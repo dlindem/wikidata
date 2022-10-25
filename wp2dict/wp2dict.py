@@ -30,7 +30,7 @@ for pagelink in pagelinks:
     #print(str(links))
 
     with open('output/'+pagetitle+'.'+wlang+'.csv', 'w') as outfile:
-        outfile.write("\t".join(header_entries)+'\n')
+        outfile.write(",".join(header_entries)+'\n')
 
         seenlinks = []
         for linkpagetitle in links:
@@ -82,23 +82,23 @@ for pagelink in pagelinks:
             if not re.search(r'^Q[0-9]+', wdid): # exclude non-valid Qid
                 continue
 
-            csvline = '\t'.join([
+            csvline = ','.join([
                         '"'+wdid+'"',
                         '"https://wikidata.org/wiki/'+wdid+'"',
                         '"'+linkpagetitle+'"',
                         '"'+'\n'.join(result['instance_of'])+'"',
                         '"'+'\n'.join(result['part_of'])+'"',
                         '"'+'\n'.join(result['subclass_of'])+'"'
-                    ])+'\t'
+                    ])+','
             for lang in allowed_lang:
                 if lang in result['labels']:
-                    langval = '"'+result['labels'][lang].replace('"','')+'"\t'
+                    langval = '"'+result['labels'][lang].replace('"','')+'",'
                 else:
-                    langval = '\t'
+                    langval = ','
                 if lang in result['sitelinks']:
-                    langval += '"https://'+lang+'.wikipedia.org/wiki/'+result['sitelinks'][lang]+'"\t'
+                    langval += '"https://'+lang+'.wikipedia.org/wiki/'+result['sitelinks'][lang]+'",'
                 else:
-                    langval += '\t'
+                    langval += ','
                 csvline += langval
             outfile.write(csvline+"\n")
             time.sleep(0.1)
