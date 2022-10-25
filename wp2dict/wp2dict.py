@@ -7,8 +7,8 @@ allowed_lang = ['eu', 'es', 'en', 'fr', 'it', 'de', 'pt', 'ca', 'cs']
 
 header_entries = ['"wikidata"', '"wikidatalink"', '"source_page"', '"instance_of"', '"part_of"', '"subclass_of"']
 for lang in allowed_lang:
-    header_entries.append(lang)
-    header_entries.append(lang+'_wikipedia')
+    header_entries.append('"'+lang+'"')
+    header_entries.append('"'+lang+'_wikipedia"')
 
 
 
