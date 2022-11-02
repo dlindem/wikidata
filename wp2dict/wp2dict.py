@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import json, re, requests, time
 
 # inlink expl # https://de.wikipedia.org/wiki/Marxistische_Wirtschaftstheorie
