@@ -25,15 +25,15 @@ for pagelink in pagelinks:
     print('\nProcessing '+pagetitle+', language '+wlang+'...\n')
     gettexturl = 'https://'+wlang+'.wikipedia.org/w/api.php?action=parse&prop=text&page='+pagetitle+'&format=json'
     pagetext = requests.get(url=gettexturl).json()['parse']['text']['*']
-
-
-    links = re.findall('href="/wiki/([^"]*)"', pagetext.split('<ol class="references">')[0]) # wiki crossrefs in text body before the references section
+	pagejson = requests.get(url='https://www.wikidata.org/w/api.php?action=wbgetentities&sites='+wlang+'wiki&format=json&titles='+pagetitle).json()
+	pageqid = wdjson['entities'].keys()[0]
+	links = re.findall('href="/wiki/([^"]*)"', pagetext.split('<ol class="references">')[0]) # wiki crossrefs in text body before the references section
     #print(str(links))
 
     with open('output/'+pagetitle+'.'+wlang+'.csv', 'w') as outfile:
         outfile.write("\t".join(header_entries)+'\n')
 
-        seenlinks = []
+        seenqid = [pageqid] # first line of result table will be the page qid itself, then the qids for blue links
         for linkpagetitle in links:
             if re.search('[A-Z][a-z]+:', linkpagetitle): # "Spezial:", "Datei:", etc.
                 continue
@@ -42,23 +42,21 @@ for pagelink in pagelinks:
             if re.search('[0-9]', linkpagetitle): # exclude page titles with numbers (pages describing days, years)
                 continue
 
-            if linkpagetitle in seenlinks:
-                continue
-            seenlinks.append(linkpagetitle)
-            print(linkpagetitle)
-            apiurl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&sites='+wlang+'wiki&format=json&titles='+linkpagetitle
+			apiurl = 'https://www.wikidata.org/w/api.php?action=wbgetentities&sites='+wlang+'wiki&format=json&titles='+linkpagetitle
             #print(apiurl)
             wdjsonsource = requests.get(url=apiurl)
             wdjson =  wdjsonsource.json()
             # with open('entity.json', 'w') as jsonfile:
             #     json.dump(wdjson, jsonfile, indent=2)
-            takeresults = 1
+            takeresults = 1 # only take the first Qid listed in 'entities'
             countresults = 0
             result = {'labels':{}, 'sitelinks':{}, 'part_of': [], 'subclass_of':[], 'instance_of':[]}
             for wdid in wdjson['entities']:
                 if countresults == takeresults:
                     break
                 countresults += 1
+				if wdid in seenqid:
+					continue
 
                 if 'labels' in wdjson['entities'][wdid]:
                     for labellang in wdjson['entities'][wdid]['labels']:
